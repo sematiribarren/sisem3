@@ -77,6 +77,8 @@ venv.bak/
 *.swo
 .history/
 
+*initial.py
+
 ### Sistemas Operativos (macOS, Linux, Windows) ###
 # Archivos basura o de caché del sistema.
 .DS_Store

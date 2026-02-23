@@ -1,0 +1,155 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SISEM 3.0 · Inicio</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    {% include 'header.html' %}
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+      <!-- Título de bienvenida -->
+      <div class="section-title"></div>
+
+      <!-- GRID DE MÓDULOS (APPS DE DJANGO) -->
+      <div class="modules-grid">
+        <!-- MÓDULO 1: Usuarios / Auth -->
+        <div class="module-card">
+          <span class="django-badge">django.contrib.auth</span>
+          <div class="module-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div class="module-info">
+            <h3>Funcionarios</h3>
+            <p>Gestión de usuarios, grupos y permisos del sistema.</p>
+            <div class="module-meta">
+              <span class="module-badge">{{empleados}} funcionarios</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 2: Administración -->
+        <div class="module-card">
+          <span class="django-badge">django.contrib.admin</span>
+          <div class="module-icon">
+            <i class="bi bi-gear-fill"></i>
+          </div>
+          <div class="module-info">
+            <h3>Admin</h3>
+            <p>Panel de administración clásico de Django.</p>
+            <div class="module-meta">
+              <span class="module-badge">admin</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 3: Ventas (ejemplo de app personalizada) -->
+        <div class="module-card">
+          <span class="django-badge">apps.bienes</span>
+          <div class="module-icon">
+            <i class="bi bi-pc-display"></i>
+          </div>
+          <div class="module-info">
+            <h3>Bienes</h3>
+            <p>Gestión de bienes en el semat</p>
+            <div class="module-meta">
+              <span class="module-badge">48 ventas hoy</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 4: Inventario -->
+        <div class="module-card">
+          <span class="django-badge">apps.deposito</span>
+          <div class="module-icon">
+            <i class="bi bi-box-seam-fill"></i>
+          </div>
+          <div class="module-info">
+            <h3>Inventario</h3>
+            <p>Control de stock, productos y almacenes.</p>
+            <div class="module-meta">
+              <span class="module-badge">1,234 items</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 5: Clientes -->
+        <div class="module-card">
+          <span class="django-badge">apps.inmuebles</span>
+          <div class="module-icon">
+            <i class="bi bi-building"></i>
+          </div>
+          <div class="module-info">
+            <h3>Inmueble</h3>
+            <p>Calculo de impuesto</p>
+            <div class="module-meta">
+              <span class="module-badge">156 clientes</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-card">
+          <span class="django-badge">apps.act_econ</span>
+          <div class="module-icon">
+            <i class="bi bi-buildings"></i>
+          </div>
+          <div class="module-info">
+            <h3>Actividad Economica</h3>
+            <p>Calculo de impuesto</p>
+            <div class="module-meta">
+              <span class="module-badge">156 clientes</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 6: Reportes -->
+        <div class="module-card">
+          <span class="django-badge">apps.reportes</span>
+          <div class="module-icon">
+            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+          </div>
+          <div class="module-info">
+            <h3>Reportes</h3>
+            <p>Estadísticas, gráficos y exportación de datos.</p>
+            <div class="module-meta">
+              <span class="module-badge">12 reportes</span>
+              <a href="#" class="module-link">
+                Acceder <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

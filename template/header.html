@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="header-container">
+        <div class="header-left">
+          <div class="logo-small">
+            <img src="{% static 'image/semat_logo.png' %}" alt="SISEM" />
+          </div>
+
+          <!-- WIDGET DE MONEDA (EURO y DÓLAR como ejemplo) -->
+          <div class="currency-widget">
+            <!-- Euro -->
+            <div class="currency-item">
+              <div class="currency-icon">
+                <i class="bi bi-currency-euro"></i>
+              </div>
+              <div class="currency-info">
+                <span class="currency-code">EUR</span>
+                <span class="currency-value">{{euro}}</span>
+              </div>
+            </div>
+
+            <!-- Dólar (opcional) -->
+            <div class="currency-item">
+              <div class="currency-icon" style="background: #10b981">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+              <div class="currency-info">
+                <span class="currency-code">USD</span>
+                <span class="currency-value">{{dolar}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Perfil de usuario -->
+        <div class="user-profile">
+          <div class="notifications">
+            <i class="bi bi-bell"></i>
+            <span class="notifications-badge">3</span>
+          </div>
+          <div class="avatar">
+            <i class="bi bi-person-circle"></i>
+            <div class="avatar-info">
+              <span class="avatar-name">Admin</span>
+              <span class="avatar-role">Superusuario</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  </body>
+</html>

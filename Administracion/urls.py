@@ -3,5 +3,6 @@ from  .views import *
 from Administracion import views
 
 urlpatterns = [
+    path('home/', Home, name='home'),
     
 ]
