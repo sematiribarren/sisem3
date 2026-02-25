@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.core.cache import cache
 import requests
 from .models import *
@@ -91,3 +92,23 @@ def Home(request):
         'dolar': tasas.get('dolar', 'No disponible'),
     }
     return render(request, 'home.html', context)
+
+def Funcionarios(request):
+
+    return render(request,"administracion/funcionarios.html")
+
+def lista_funcionarios(request):
+
+    entity = Empleado.objects.all()
+    data = [
+        {
+            'cedula': c.document,
+            'nombre': c.names, 
+            'telefono': c.phone,
+            'status': c.condition,
+            'cargo': c.position,
+            'area': c.area,
+            'id': c.id,
+            } for c in entity
+        ]
+    return JsonResponse({'data':data}, safe=False)

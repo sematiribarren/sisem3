@@ -20,7 +20,6 @@ class Empleado(models.Model):
     id = models.AutoField(primary_key=True)
     document=models.CharField(unique=True, max_length=10, blank=False)
     names = models.CharField(max_length=150, blank=False)
-    surnames=models.CharField(max_length=150, blank=False)
     address = models.CharField(max_length=120, blank=False)
     birth = models.DateField(blank=False)
     income = models.DateField(blank=False)

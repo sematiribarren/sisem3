@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -5,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Funcionarios</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tooltip2.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/sweetalert.min.css' %}" />
+    <script src="/static/js/datatables.js"></script>
+    <script src="/static/js/sweetalert.min.js"></script>
+    <script src="/static/js/jquery-3.7.0.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
@@ -15,6 +23,114 @@
     />
   </head>
   <body>
-    {% include 'header.html' %}
+    {% if user.is_authenticated == 0 %}
+    <meta http-equiv="refresh" content="0;url={% url 'login' %}" />
+    {% endif %} {% if messages%} {% for m in messages %}
+    <script>
+      Swal.fire({
+        title: "Felicidades",
+        text: "{{m}}",
+        icon: "success",
+      });
+    </script>
+    {% endfor %} {% endif %} {% include 'header.html' %}
+    <main class="data-table">
+      <h1>Listado de Funcionarios</h1>
+
+      <table id="DataTable">
+        <thead>
+          <tr>
+            <th>Cedula</th>
+            <th>Nombre</th>
+            <th>Telefono</th>
+            <th>Status</th>
+            <th>Cargo</th>
+            <th>Area</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+      </table>
+    </main>
+    <script src="/static/js/datatables.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#DataTable").DataTable({
+          responsive: true,
+          dom: '<"table-options"<"lb-container"lB>fr>tip',
+          lengthMenu: [10, 25, 50, -1],
+          buttons: [
+            {
+              text: "Añadir nuevo registro",
+              className: "btn-new",
+              action: (e) => {
+                window.location.href = "";
+              },
+            },
+            {
+              extend: "excel",
+              filename: " FUNCIONARIOS-EXCEL",
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5],
+              },
+            },
+            {
+              extend: "pdf",
+              filename: " FUNCIONARIOS-PDF",
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5],
+              },
+            },
+          ],
+          ajax: "{% url 'lista_funcionarios' %}",
+          columns: [
+            { data: "cedula" },
+            { data: "nombre" },
+            { data: "telefono" },
+            { data: "status" },
+            { data: "cargo" },
+            { data: "area" },
+            {
+              data: null,
+              searchable: false,
+              orderable: false,
+              defaultContent:
+                "{% if perms.act_econ.change_solvencia_def %} <button class='actions edit'><svg  xmlns='http://www.w3.org/2000/svg'  width='24'  height='24'  viewBox='0 0 24 24'  fill='none'  stroke='currentColor'  stroke-width='2'  stroke-linecap='round'  stroke-linejoin='round'  class='icon icon-tabler icons-tabler-outline icon-tabler-edit'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1' /><path d='M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z' /><path d='M16 5l3 3' /></svg></button>{% endif %} <button class='actions delete'><svg  xmlns='http://www.w3.org/2000/svg'  width='24'  height='24'  viewBox='0 0 24 24'  fill='none'  stroke='currentColor'  stroke-width='2'  stroke-linecap='round'  stroke-linejoin='round'  class='icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M14 3v4a1 1 0 0 0 1 1h4' /><path d='M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4' /><path d='M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6' /><path d='M17 18h2' /><path d='M20 15h-3v6' /><path d='M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1z' /></svg></button>",
+            },
+          ],
+          initComplete: function (settings, json) {
+            $("#DataTable tbody").delegate(
+              ".actions.edit",
+              "click",
+              function () {
+                var data = $("#DataTable")
+                  .DataTable()
+                  .row($(this).parents("tr"))
+                  .data();
+                var id = data.id;
+                window.location.href = "" + id;
+              },
+            );
+            $("#DataTable tbody").delegate(
+              ".actions.delete",
+              "click",
+              function () {
+                var data = $("#DataTable")
+                  .DataTable()
+                  .row($(this).parents("tr"))
+                  .data();
+                var id = data.id;
+                window.location.href = "pdf/" + id;
+              },
+            );
+          },
+          success: function (response) {
+            console.log("Datos recibidos:", response);
+          },
+          error: function (xhr, status, error) {
+            console.error("Error al recibir datos:", error);
+          },
+        });
+      });
+    </script>
   </body>
 </html>
