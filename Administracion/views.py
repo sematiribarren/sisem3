@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.core.cache import cache
 import requests
 from .models import *
+from .forms import *
 
 
 def obtener_tasas_api():
@@ -112,3 +113,18 @@ def lista_funcionarios(request):
             } for c in entity
         ]
     return JsonResponse({'data':data}, safe=False)
+
+def crear_funcionario(request):
+    
+    context = {
+        'form': EmpleadoForm()
+    }
+
+    if request.method == 'POST':
+        formulario = EmpleadoForm(request.POST)
+        if formulario.is_valid():
+            formulario.save()
+            context['mensaje'] = "Guardado correctamente"
+        else:
+            context['form'] = formulario
+    return render(request, 'administracion/new_func.html', context)

@@ -11,4 +11,5 @@ urlpatterns = [
     #--------------Funcionarios-----------------------
     path('funcionarios/', Funcionarios, name='funcionarios'),
     path('listado_funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),
+    path('crear_funcionario/', views.crear_funcionario, name='crear_funcionario'),
 ]

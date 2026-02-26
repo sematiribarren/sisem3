@@ -21,7 +21,7 @@ class Empleado(models.Model):
     document=models.CharField(unique=True, max_length=10, blank=False)
     names = models.CharField(max_length=150, blank=False)
     address = models.CharField(max_length=120, blank=False)
-    birth = models.DateField(blank=False)
+    birthday = models.DateField(blank=False)
     income = models.DateField(blank=False)
     phone = models.CharField(max_length=20, blank=False)
     SEXO_CHOICES=(
@@ -40,7 +40,11 @@ class Empleado(models.Model):
     )
     condition = models.CharField(choices=condicion_choice, max_length=20, blank=False, default='activo')
     position = models.CharField(max_length=100, blank=False)
-    children = models.BooleanField(default=False)
+    options_children = (
+        (True, 'Sí'),
+        (False, 'No'),
+    )
+    children = models.BooleanField(choices=options_children, default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     area = models.ForeignKey(Departamento, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
