@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.views.decorators.cache import never_cache
 from django.http import JsonResponse
 from django.core.cache import cache
 import requests
@@ -98,6 +99,8 @@ def Funcionarios(request):
 
     return render(request,"administracion/funcionarios.html")
 
+
+@never_cache
 def lista_funcionarios(request):
 
     entity = Empleado.objects.all()
@@ -106,14 +109,16 @@ def lista_funcionarios(request):
             'cedula': c.document,
             'nombre': c.names, 
             'telefono': c.phone,
-            'status': c.condition,
+            'status': c.condition.capitalize(),
             'cargo': c.position,
-            'area': c.area,
+            'area': c.area.name,
             'id': c.id,
             } for c in entity
         ]
     return JsonResponse({'data':data}, safe=False)
 
+
+@never_cache
 def crear_funcionario(request):
     
     context = {
@@ -125,6 +130,7 @@ def crear_funcionario(request):
         if formulario.is_valid():
             formulario.save()
             context['mensaje'] = "Guardado correctamente"
+            return redirect('funcionarios')
         else:
             context['form'] = formulario
     return render(request, 'administracion/new_func.html', context)
