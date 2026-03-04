@@ -4,6 +4,7 @@ from Administracion import views
 
 urlpatterns = [
     path('home/', Home, name='home'),
+    path("profile/", views.profile, name="profile"),
     
 
 
@@ -12,4 +13,5 @@ urlpatterns = [
     path('funcionarios/', Funcionarios, name='funcionarios'),
     path('listado_funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),
     path('crear_funcionario/', views.crear_funcionario, name='crear_funcionario'),
+
 ]

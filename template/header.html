@@ -41,19 +41,21 @@
         </div>
 
         <!-- Perfil de usuario -->
-        <div class="user-profile">
-          <div class="notifications">
-            <i class="bi bi-bell"></i>
-            <span class="notifications-badge">3</span>
-          </div>
-          <div class="avatar">
-            <i class="bi bi-person-circle"></i>
-            <div class="avatar-info">
-              <span class="avatar-name">Admin</span>
-              <span class="avatar-role">Superusuario</span>
+        <a href="{% url 'profile' %}" class="header-right">
+          <div class="user-profile">
+            <div class="notifications">
+              <i class="bi bi-bell"></i>
+              <span class="notifications-badge">3</span>
+            </div>
+            <div class="avatar">
+              <i class="bi bi-person-circle"></i>
+              <div class="avatar-info">
+                <span class="avatar-name">Admin</span>
+                <span class="avatar-role">Superusuario</span>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
       </div>
     </header>
   </body>

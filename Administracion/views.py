@@ -134,3 +134,8 @@ def crear_funcionario(request):
         else:
             context['form'] = formulario
     return render(request, 'administracion/new_func.html', context)
+
+
+def profile(request):
+    
+    return render(request, 'profile.html')
