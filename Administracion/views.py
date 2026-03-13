@@ -85,6 +85,7 @@ def obtener_tasas_fallback():
 
 def Home(request):
     empleados = Empleado.objects.all().count()
+    user = request.user
 
     tasas = obtener_tasas_api()
     
@@ -92,6 +93,7 @@ def Home(request):
         'empleados': empleados,
         'euro': tasas.get('euro', 'No disponible'),
         'dolar': tasas.get('dolar', 'No disponible'),
+        'user': user,
     }
     return render(request, 'home.html', context)
 
@@ -136,6 +138,13 @@ def crear_funcionario(request):
     return render(request, 'administracion/new_func.html', context)
 
 
-def profile(request):
+def profile(request, id):
+
+
+    employee = Empleado.objects.filter(user = id).first()
+
+    context = {
+        'employee': employee
+    }
     
-    return render(request, 'profile.html')
+    return render(request, 'profile.html', context)

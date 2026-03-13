@@ -41,12 +41,12 @@
         </div>
 
         <!-- Perfil de usuario -->
-        <a href="{% url 'profile' %}" class="header-right">
-          <div class="user-profile">
-            <div class="notifications">
-              <i class="bi bi-bell"></i>
-              <span class="notifications-badge">3</span>
-            </div>
+        <div class="user-profile">
+          <div class="notifications">
+            <i class="bi bi-bell"></i>
+            <span class="notifications-badge">3</span>
+          </div>
+          <a href="/profile/{{ user.id }}" class="header-right">
             <div class="avatar">
               <i class="bi bi-person-circle"></i>
               <div class="avatar-info">
@@ -54,8 +54,8 @@
                 <span class="avatar-role">Superusuario</span>
               </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </div>
       </div>
     </header>
   </body>

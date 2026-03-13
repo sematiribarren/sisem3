@@ -4,7 +4,7 @@ from Administracion import views
 
 urlpatterns = [
     path('home/', Home, name='home'),
-    path("profile/", views.profile, name="profile"),
+    path("profile/<int:id>", views.profile, name="profile"),
     
 
 
