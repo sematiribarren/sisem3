@@ -1,28 +1,27 @@
 from django.db import models
 from Administracion.models import *
-# Create your models here.
-
 
 class Bienes (models.Model):
     id = models.AutoField(primary_key=True)
-    bm = models.CharField (max_length=200, unique=True, blank=False)
-    description = models.CharField (max_length=100, blank=True)
-    serial = models.CharField (max_length=200, unique=True)
+    bm = models.CharField(max_length=200, unique=True, blank=False)
+    description = models.TextField(max_length=500, blank=True)
+    serial = models.CharField (max_length=250, blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True)
     model = models.CharField(max_length=100, blank=True)
     color = models.CharField(max_length=100, blank=True)
-    purchase_date = models.DateField()
-    invoice = models.CharField(max_length= 70, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    account = models.CharField(max_length=100, blank=True)
-    entity = models.CharField(max_length=100, blank=True)
-    rif = models.CharField(max_length=100, blank=True)
-    observacion = models.CharField(max_length=100, blank=True)
-    tipoC = (
-        ('good', 'Bueno'),
-        ('damaged', 'Dañado'),    
+    note = models.CharField(max_length=100, blank=True, null=True)
+    part = models.CharField(blank=True, null=True, max_length=20)  # Ej: "0/4"
+    select_a = (
+        ('Bueno', 'Bueno'),
+        ('Dañado', 'Dañado'),    
     )
-    status = models.CharField(max_length=50, choices=tipoC, default='good')
+    status = models.CharField(max_length=50, choices=select_a, default='Bueno')
+    select_b = (
+        ('Completo', 'Completo'),
+        ('Incompleto', 'Incompleto'),
+    )
+    condition = models.CharField(max_length=50, choices=select_b, default='Completo')
  
     class Meta:
         db_table = 'bienes'
@@ -36,7 +35,6 @@ class Bienes_persona(models.Model):
     id = models.AutoField(primary_key=True)
     area = models.ForeignKey(Departamento, on_delete=models.CASCADE, blank=False)
     id_worker = models.ForeignKey(Empleado, on_delete=models.CASCADE, max_length=20, blank=True)
-    cargo_area = models.CharField(max_length=100, blank=True)
     id_bien = models.ForeignKey(Bienes, on_delete=models.CASCADE, max_length=20, blank=True)
     bm_worker = models.CharField(max_length=100, blank=True)
     serial = models.CharField(max_length=100, blank=True)

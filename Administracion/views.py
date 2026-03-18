@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.core.cache import cache
 import requests
 from .models import *
+from Bienes.models import Bienes
 from .forms import *
 
 
@@ -85,12 +86,15 @@ def obtener_tasas_fallback():
 
 def Home(request):
     empleados = Empleado.objects.all().count()
+    bienes = Bienes.objects.all().count()
+
     user = request.user
 
     tasas = obtener_tasas_api()
     
     context = {
         'empleados': empleados,
+        'bienes': bienes,
         'euro': tasas.get('euro', 'No disponible'),
         'dolar': tasas.get('dolar', 'No disponible'),
         'user': user,
@@ -100,7 +104,6 @@ def Home(request):
 def Funcionarios(request):
 
     return render(request,"administracion/funcionarios.html")
-
 
 @never_cache
 def lista_funcionarios(request):
@@ -119,7 +122,6 @@ def lista_funcionarios(request):
         ]
     return JsonResponse({'data':data}, safe=False)
 
-
 @never_cache
 def crear_funcionario(request):
     
@@ -137,7 +139,6 @@ def crear_funcionario(request):
             context['form'] = formulario
     return render(request, 'administracion/new_func.html', context)
 
-
 def profile(request, id):
 
 
@@ -148,3 +149,5 @@ def profile(request, id):
     }
     
     return render(request, 'profile.html', context)
+
+
