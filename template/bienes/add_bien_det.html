@@ -49,7 +49,12 @@
         </div>
         <div class="div3">
           <h6>BM</h6>
-          {{form.bm_worker}}
+          <input
+            type="text"
+            disabled
+            class="form-control"
+            value="{{bien.bm}}"
+          />
         </div>
         <div class="div4">
           <h6>Serial</h6>
@@ -64,8 +69,11 @@
           {{form.description}}
         </div>
         <div class="div7">
-          <h6>Condición</h6>
-          {{form.condition}}
+          <select name="condition">
+            <option value="good">Bueno</option>
+            <option value="damaged">Dañado</option>
+            <!-- Este es el valor correcto -->
+          </select>
         </div>
         <div class="div8">
           <button class="btn btn-primary" type="submit">Guardar</button>

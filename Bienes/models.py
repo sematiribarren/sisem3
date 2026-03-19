@@ -40,14 +40,10 @@ class Bienes_persona(models.Model):
     serial = models.CharField(max_length=100, blank=True)
     description = models.CharField (max_length=100, blank=True)
     brand = models.CharField(max_length=100, blank=True)
-    condition_choices = (
-        ('good', 'Bueno'),
-        ('damaged', 'Dañado'),    
-    )
-    condition = models.CharField(max_length=50, choices=condition_choices, default='good')
-    signature = models.FileField(upload_to ='Firma_persona/',  blank=True)
-    observation = models.CharField(max_length=100, blank=True)
-    estatus = models.BooleanField()
+    condition = models.CharField(max_length=50, blank=True)
+    signature = models.FileField(upload_to ='Firma_persona/',  blank=True, null=True)
+    observation = models.CharField(max_length=100, blank=True, null=True)
+    estatus = models.BooleanField(default=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
