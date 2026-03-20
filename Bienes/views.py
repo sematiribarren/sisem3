@@ -42,7 +42,6 @@ def add_bien(request, id):
         if form.is_valid():
             print("Formulario válido, procesando...")
             
-            # Procesar el part del bien físico
             if bien_fisico.part and '/' in bien_fisico.part:
                 try:
                     actual, total = map(int, bien_fisico.part.split('/'))
@@ -66,16 +65,13 @@ def add_bien(request, id):
                     print(f"Error al procesar part: {e}")
             
             try:
-                # ASIGNAR VALORES ANTES DE GUARDAR
                 form.instance.bm_worker = bien_fisico.bm
                 form.instance.id_bien = bien_fisico
                 
-                # ASIGNAR LA CONDICIÓN AL OBJETO
                 if condition_bien:
                     form.instance.condition = condition_bien
                     print(f"Asignando condición: {condition_bien} a la instancia")
                 
-                # AHORA guardar el formulario (esto crea el registro con la condición)
                 asignacion = form.save()
                 
                 print(f"Asignación guardada exitosamente con ID: {asignacion.id}")
