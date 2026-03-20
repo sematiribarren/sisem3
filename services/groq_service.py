@@ -23,66 +23,64 @@ class GroqService:
         Versión mejorada con categorías específicas
         """
         
-        # Categorías y sus componentes esperados
         categorias = {
             'LAPTOP': {
                 'palabras_clave': ['LAPTOP', 'NOTEBOOK', 'PORTATIL', 'MACBOOK'],
-                'componentes': 2,  # Laptop + cargador
+                'componentes': 2,  
                 'descripcion': 'Laptop (incluye cargador)'
             },
             'COMPUTADOR_COMPLETO': {
                 'palabras_clave': ['COMPUTADOR', 'PC', 'DESKTOP', 'EQUIPO', 'VIT', 'PENTIUM', 'CORE', 'CPU'],
-                'componentes': 4,  # CPU, monitor, teclado, mouse
+                'componentes': 4,  
                 'descripcion': 'Computador de escritorio completo'
             },
             'COMPUTADOR_CON_CORNETAS': {
                 'palabras_clave': ['CORNETA', 'PARLANTE', 'SPEAKER', 'AUDIFONO'],
-                'componentes': 5,  # CPU, monitor, teclado, mouse, cornetas
+                'componentes': 5,  
                 'descripcion': 'Computador con cornetas'
             },
             'CPU_SOLO': {
                 'palabras_clave': ['CPU', 'GABINETE', 'TORRE'],
-                'componentes': 1,  # Solo la CPU
+                'componentes': 1,  
                 'descripcion': 'CPU/torre sola'
             },
             'MONITOR': {
                 'palabras_clave': ['MONITOR', 'LCD', 'LED', 'PANTALLA'],
-                'componentes': 1,  # Monitor solo
+                'componentes': 1,  
                 'descripcion': 'Monitor individual'
             },
             'TECLADO': {
                 'palabras_clave': ['TECLADO', 'KEYBOARD'],
-                'componentes': 1,  # Teclado solo
+                'componentes': 1,  
                 'descripcion': 'Teclado individual'
             },
             'MOUSE': {
                 'palabras_clave': ['MOUSE', 'RATON'],
-                'componentes': 1,  # Mouse solo
+                'componentes': 1,  
                 'descripcion': 'Mouse individual'
             },
             'IMPRESORA': {
                 'palabras_clave': ['IMPRESORA', 'PRINTER', 'MULTIFUNCIONAL'],
-                'componentes': 1,  # Impresora sola
+                'componentes': 1,  
                 'descripcion': 'Impresora'
             },
             'SILLA': {
                 'palabras_clave': ['SILLA', 'CHAIR', 'SILLON'],
-                'componentes': 1,  # Silla sola
+                'componentes': 1,  
                 'descripcion': 'Silla'
             },
             'ESCRITORIO': {
                 'palabras_clave': ['ESCRITORIO', 'MESA', 'DESK'],
-                'componentes': 1,  # Escritorio solo
+                'componentes': 1,  
                 'descripcion': 'Escritorio'
             },
             'OTRO': {
                 'palabras_clave': [],
-                'componentes': 1,  # Por defecto
+                'componentes': 1,  
                 'descripcion': 'Bien individual'
             }
         }
         
-        # Prompt mejorado para Groq
         prompt = f"""
         Analiza la siguiente descripción de un bien de inventario y determina QUÉ TIPO de equipo es y CUÁNTOS componentes físicos debería tener.
 
@@ -126,13 +124,11 @@ class GroqService:
             respuesta = response.choices[0].message.content.strip()
             logger.info(f"Respuesta de Groq: {respuesta}")
             
-            # Parsear la respuesta
             if '|' in respuesta:
                 partes = respuesta.split('|')
                 total = int(partes[0].strip())
                 categoria = partes[1].strip()
             else:
-                # Si no viene con formato, intentar extraer solo el número
                 numeros = re.findall(r'\d+', respuesta)
                 if numeros:
                     total = int(numeros[0])
@@ -141,7 +137,6 @@ class GroqService:
                     total = self._determinar_manual(descripcion)
                     categoria = "MANUAL"
             
-            # Validar que sea un número válido
             if total in [1, 2, 4, 5]:
                 return total, categoria
             else:
@@ -158,16 +153,14 @@ class GroqService:
         """
         descripcion_upper = descripcion.upper()
         
-        # 1. Detectar LAPTOP
         if any(p in descripcion_upper for p in ['LAPTOP', 'NOTEBOOK', 'PORTATIL', 'MACBOOK']):
             logger.info(f"Detectado LAPTOP: {descripcion[:50]}")
             return 2
         
-        # 2. Detectar COMPUTADOR COMPLETO (con mención de componentes)
         if any(pc in descripcion_upper for pc in ['COMPUTADOR', 'PC', 'DESKTOP', 'EQUIPO', 'VIT', 'PENTIUM', 'CORE']):
-            # Verificar si menciona componentes específicos
+
             if 'MONITOR' in descripcion_upper or 'TECLADO' in descripcion_upper or 'MOUSE' in descripcion_upper:
-                # Verificar si tiene cornetas
+  
                 if any(p in descripcion_upper for p in ['CORNETA', 'PARLANTE', 'SPEAKER']):
                     logger.info(f"Detectado COMPUTADOR CON CORNETAS: {descripcion[:50]}")
                     return 5
@@ -175,23 +168,23 @@ class GroqService:
                     logger.info(f"Detectado COMPUTADOR COMPLETO: {descripcion[:50]}")
                     return 4
         
-        # 3. Detectar CPU SOLA
+  
         if 'CPU' in descripcion_upper and not any(comp in descripcion_upper for comp in ['MONITOR', 'TECLADO', 'MOUSE']):
             logger.info(f"Detectado CPU SOLA: {descripcion[:50]}")
             return 1
         
-        # 4. Detectar MONITOR SOLO
+   
         if 'MONITOR' in descripcion_upper and not any(pc in descripcion_upper for pc in ['COMPUTADOR', 'CPU']):
             logger.info(f"Detectado MONITOR SOLO: {descripcion[:50]}")
             return 1
         
-        # 5. Detectar COMPONENTES INDIVIDUALES
+  
         componentes_individuales = ['TECLADO', 'MOUSE', 'IMPRESORA', 'SILLA', 'ESCRITORIO', 'MESA']
         for comp in componentes_individuales:
             if comp in descripcion_upper:
                 logger.info(f"Detectado {comp}: {descripcion[:50]}")
                 return 1
         
-        # 6. Por defecto
+    
         logger.info(f"Tipo no detectado, asumiendo bien individual: {descripcion[:50]}")
         return 1
