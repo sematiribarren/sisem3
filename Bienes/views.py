@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
+from django.contrib import messages
+from django.urls import reverse
 from .models import *
 from .forms import *
 
@@ -95,12 +97,106 @@ def add_bien(request, id):
     
     return render(request, 'bienes/add_bien_det.html', context)
 
-
 def bienes_detallado(request, id):
-    bien = get_object_or_404(Bienes, id=id)
-    bienes_asignados = Bienes_persona.objects.filter(id_bien=bien)
+
+    bienes_fisico = get_object_or_404(Bienes, id=id)
+    bienes_asignados = Bienes_persona.objects.filter(id_bien=id)
+
     context = {
-        'bienes_asignados': bienes_asignados,
-        'bienes': bien
+        'bien': bienes_fisico,
+        'ajax_url': reverse('lista_bienes_det') 
     }
+   
     return render(request, 'bienes/bienes_det.html', context)
+
+def lista_bienes_det(request):
+    print("=== DEBUG ===")
+    print("GET params:", request.GET)
+    
+    bien_id = request.GET.get('bien_id')
+    print("bien_id recibido:", bien_id)
+    
+    if not bien_id:
+        return JsonResponse({'error': 'Se requiere bien_id'}, status=400)
+    
+    try:
+        # Filtra los registros
+        entity = Bienes_persona.objects.filter(id_bien=bien_id)
+        print("Registros encontrados:", entity.count())
+        
+        data = []
+        for c in entity:
+            print(f"Procesando: {c.id} - {c.description}")
+            data.append({
+                'descripcion': c.description or '',
+                'area': str(c.area.name) if c.area else '',  # Ajusta según tu modelo
+                'funcionario': str(c.id_worker.names) if c.id_worker else '',  # Ajusta según tu modelo
+                'condicion': c.condition.capitalize() if c.condition else '',
+                'observacion': c.observation or '',
+                'id': c.id,
+            })
+        
+        print("Data a enviar:", data)
+        return JsonResponse({'data': data}, safe=False)
+        
+    except Exception as e:
+        print("ERROR:", str(e))
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+    
+def borrar_asignacion(request, id):
+    try:
+        # Busca la asignación específica por su ID
+        asignacion = get_object_or_404(Bienes_persona, id=id)
+        
+        # Obtén el bien físico relacionado
+        bien_fisico = asignacion.id_bien  # O asignacion.id_bien según tu modelo
+        
+        # Guarda el part actual para debug
+        print(f"Part antes de eliminar: {bien_fisico.part}")
+        
+        # Elimina la asignación
+        asignacion.delete()
+        
+        # Actualiza el contador en bienes físicos
+        if bien_fisico.part and '/' in bien_fisico.part:
+            try:
+                actual, total = map(int, bien_fisico.part.split('/'))
+                
+                # Solo resta si hay asignaciones actuales (actual > 0)
+                if actual > 0:
+                    actual -= 1
+                    nuevo_part = f"{actual}/{total}"
+                    bien_fisico.part = nuevo_part
+                    
+                    # Actualiza la condición basada en el nuevo valor
+                    if actual == total:
+                        bien_fisico.condition = 'Completo'
+                    else:
+                        bien_fisico.condition = 'Incompleto'
+                    
+                    # Si no hay más asignaciones, la condición podría ser 'Completo' pero no hay partes asignadas
+                    if actual == 0:
+                        bien_fisico.condition = 'Completo'
+                    
+                    bien_fisico.save()
+                    print(f"Part actualizado: {nuevo_part}, Condition: {bien_fisico.condition}")
+                    
+                    messages.success(request, f"Asignación eliminada correctamente. Part actual: {actual}/{total}")
+                else:
+                    messages.warning(request, "No había asignaciones para descontar")
+                    
+            except ValueError as e:
+                print(f"Error al procesar part: {e}")
+                messages.error(request, "Error al actualizar el contador")
+        else:
+            # Si no tiene formato part, solo elimina la asignación
+            messages.success(request, "Asignación eliminada correctamente")
+        
+        return redirect('bienes')
+        
+    except Exception as e:
+        print(f"Error en borrar_asignacion: {e}")
+        messages.error(request, f"Error al eliminar la asignación: {str(e)}")
+        return redirect('bienes')

@@ -4,7 +4,7 @@ from .models import *
 class addBien_form(forms.ModelForm):
     class Meta:
         model = Bienes_persona
-        fields = ['area', 'id_worker',  'serial', 'description', 'brand']
+        fields = ['area', 'id_worker',  'serial', 'description', 'brand', 'observation']
 
         widgets = {
             'area': forms.Select(attrs={'class': 'form-select'}),
@@ -12,4 +12,5 @@ class addBien_form(forms.ModelForm):
             'serial': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
             'brand': forms.TextInput(attrs={'class': 'form-control'}),
+            'observation': forms.TextInput(attrs={'class': 'form-control'}),
         }

@@ -4,54 +4,191 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienes</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/form/bien_det.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tooltip2.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/sweetalert.min.css' %}" />
+    <script src="/static/js/datatables.js"></script>
+    <script src="/static/js/sweetalert.min.js"></script>
+    <script src="/static/js/jquery-3.7.0.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
-    />
-    <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet"
     />
-    <title>Detallado de bienes</title>
   </head>
   <body>
-    {% include 'header.html' %}
+    {% if user.is_authenticated == 0 %}
+    <meta http-equiv="refresh" content="0;url={% url 'login' %}" />
+    {% endif %} {% if messages%} {% for m in messages %}
+    <script>
+      Swal.fire({
+        title: "Felicidades",
+        text: "{{m}}",
+        icon: "success",
+      });
+    </script>
+    {% endfor %} {% endif %} {% include 'header.html' %}
+    <main class="data-table">
+      <h4>{{bien.bm}} - {{bien.description}}</h4>
 
-    <div class="title">
-      <h4>BM-{{bienes.bm}}, Descripcion: {{bienes.description}}</h4>
-    </div>
+      <table id="DataTable">
+        <thead>
+          <tr>
+            <th>Descripcion</th>
+            <th>Area</th>
+            <th>Funcionario</th>
+            <th>Condicion</th>
+            <th>Observacion</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+      </table>
+    </main>
+    <script src="/static/js/datatables.js"></script>
+    <script>
+      $(document).ready(function () {
+        var bienId = "{{ bien.id }}";
+        console.log("ID del bien:", bienId);
 
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Descripcion</th>
-          <th scope="col">Serial</th>
-          <th scope="col">Area</th>
-          <th scope="col">Funcionario</th>
-          <th scope="col">Condicion</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for b in bienes_asignados %}
-        <tr>
-          <th scope="row">{{forloop.counter}}</th>
-          <td>{{b.description}}</td>
-          <td>{{b.serial}}</td>
-          <td>{{b.area}}</td>
-          <td>{{b.id_worker.names}}</td>
-          <td>{{b.condition}}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        $("#DataTable").DataTable({
+          responsive: true,
+          processing: true,
+          dom: '<"table-options"<"lb-container"lB>fr>tip',
+          lengthMenu: [10, 25, 50, -1],
+          buttons: [
+            {
+              text: "Bienes separados",
+              className: "btn-new",
+              action: (e) => {
+                window.location.href = "";
+              },
+            },
+            {
+              text: "Areas",
+              className: "btn-area",
+              action: (e) => {
+                window.location.href = "";
+              },
+            },
+            {
+              extend: "excel",
+              filename: " BIENES-EXCEL",
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5],
+              },
+            },
+            {
+              extend: "pdf",
+              filename: " BIENES-PDF",
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5],
+              },
+            },
+          ],
+          ajax: {
+            url: "{% url 'lista_bienes_det' %}",
+            type: "GET",
+            data: function (d) {
+              d.bien_id = bienId; // Ahora bienId está definido
+              console.log("Enviando parámetros:", d); // Depuración
+              return d;
+            },
+            dataSrc: function (json) {
+              console.log("Respuesta recibida:", json); // Depuración
+              return json.data;
+            },
+            error: function (xhr, status, error) {
+              console.error("Error AJAX:", error);
+              console.error("Estado:", status);
+              console.error("Respuesta:", xhr.responseText);
+              Swal.fire({
+                title: "Error",
+                text: "No se pudieron cargar los datos: " + error,
+                icon: "error",
+              });
+            },
+          },
+          columns: [
+            { data: "descripcion" },
+            { data: "area" },
+            { data: "funcionario" },
+            { data: "condicion" },
+            { data: "observacion" },
+            {
+              data: null,
+              searchable: false,
+              orderable: false,
+              defaultContent:
+                "<button class='actions plus'> <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-pencil-square' viewBox='0 0 16 16'><path d='M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z'/><path fill-rule='evenodd' d='M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z'/></svg></button>{% if perms.Bienes.delete_bienes %} <button class='actions delete'><svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-trash' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z'/><path d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z'/></svg></button> {% endif %}",
+            },
+          ],
+          initComplete: function (settings, json) {
+            $("#DataTable tbody").delegate(
+              ".actions.delete",
+              "click",
+              function () {
+                var data = $("#DataTable")
+                  .DataTable()
+                  .row($(this).parents("tr"))
+                  .data();
+                var id = data.id;
+                Swal.fire({
+                  title: "Estás seguro?",
+                  text: "Este Bien se eliminará de forma permanente!",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonText: "¡Sí, bórralo!",
+                  cancelButtonText: "No, guárdalo",
+                }).then((result) => {
+                  if (result.value) {
+                    window.location.href = "/borrar_asignacion/" + id;
+                  }
+                });
+              },
+            );
+            $("#DataTable tbody").delegate(
+              ".actions.plus",
+              "click",
+              function () {
+                var data = $("#DataTable")
+                  .DataTable()
+                  .row($(this).parents("tr"))
+                  .data();
+                var id = data.id;
+                window.location.href = "{% url 'add_bien' id=1 %}".replace(
+                  "1",
+                  id,
+                );
+              },
+            );
+            $("#DataTable tbody").delegate(
+              ".actions.view",
+              "click",
+              function () {
+                var data = $("#DataTable")
+                  .DataTable()
+                  .row($(this).parents("tr"))
+                  .data();
+                var id = data.id;
+                window.location.href =
+                  "{% url 'bienes_detallado' id=1 %}".replace("1", id);
+              },
+            );
+          },
+          success: function (response) {
+            console.log("Datos recibidos:", response);
+          },
+          error: function (xhr, status, error) {
+            console.error("Error al recibir datos:", error);
+          },
+        });
+      });
+    </script>
   </body>
 </html>

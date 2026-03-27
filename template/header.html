@@ -4,6 +4,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/sweetalert.min.css' %}" />
+    <script src="/static/js/sweetalert.min.js"></script>
+    <script src="/static/js/jquery-3.7.0.min.js"></script>
     <title>Document</title>
   </head>
   <body>
@@ -11,7 +14,9 @@
       <div class="header-container">
         <div class="header-left">
           <div class="logo-small">
-            <img src="{% static 'image/semat_logo.png' %}" alt="SISEM" />
+            <a href="{% url 'home' %}">
+              <img src="{% static 'image/semat_logo.png' %}" alt="SISEM" />
+            </a>
           </div>
 
           <!-- WIDGET DE MONEDA (EURO y DÓLAR como ejemplo) -->
