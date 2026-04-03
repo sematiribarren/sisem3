@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect
 from django.views.decorators.cache import never_cache
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.contrib import messages
 from django.core.cache import cache
-import requests
-from .models import *
 from Bienes.models import Bienes
+from .models import *
 from .forms import *
+import requests
 
 
 def obtener_tasas_api():
@@ -106,38 +108,89 @@ def Funcionarios(request):
     return render(request,"administracion/funcionarios.html")
 
 @never_cache
+@login_required
 def lista_funcionarios(request):
 
-    entity = Empleado.objects.all()
-    data = [
-        {
-            'cedula': c.document,
-            'nombre': c.names, 
-            'telefono': c.phone,
-            'status': c.condition.capitalize(),
-            'cargo': c.position,
-            'area': c.area.name,
-            'id': c.id,
-            } for c in entity
-        ]
-    return JsonResponse({'data':data}, safe=False)
+    usuario_actual = request.user
+    rol = get_user_role(usuario_actual)
+
+    if rol == 'admin':
+
+        entity = Empleado.objects.all()
+        data = [
+            {
+                'cedula': c.document,
+                'nombre': c.names, 
+                'telefono': c.phone,
+                'status': c.condition.capitalize(),
+                'cargo': c.position,
+                'area': c.area.name,
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
+    
+    elif rol[0] == 'encargado_bienes':
+        area = rol[1]
+        
+        entity = Empleado.objects.filter(area=area)
+        data = [
+            {
+                'cedula': c.document,
+                'nombre': c.names, 
+                'telefono': c.phone,
+                'status': c.condition.capitalize(),
+                'cargo': c.position,
+                'area': c.area.name,
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
+    
+    else:
+
+        entity = Empleado.objects.filter(user = usuario_actual)
+        data = [
+            {
+                'cedula': c.document,
+                'nombre': c.names, 
+                'telefono': c.phone,
+                'status': c.condition.capitalize(),
+                'cargo': c.position,
+                'area': c.area.name,
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
 
 @never_cache
+@login_required
 def crear_funcionario(request):
+
+    usuario_actual = request.user
+    rol = get_user_role(usuario_actual)
     
     context = {
         'form': EmpleadoForm()
     }
 
-    if request.method == 'POST':
-        formulario = EmpleadoForm(request.POST)
-        if formulario.is_valid():
-            formulario.save()
-            context['mensaje'] = "Guardado correctamente"
-            return redirect('funcionarios')
-        else:
-            context['form'] = formulario
-    return render(request, 'administracion/new_func.html', context)
+    if rol == 'admin' or rol[0] == 'encargado_bienes':
+
+        if request.method == 'POST':
+            formulario = EmpleadoForm(request.POST, user=usuario_actual)
+            if formulario.is_valid():
+                empleado = formulario.save(commit=False)
+
+                if rol[0] == 'encargado_bienes':
+                    empleado.area = rol[1]  # Asignar el área del encargado
+                
+                empleado.save()
+                messages.success(request, 'Empleado registrado exitosamente')
+
+                return redirect('funcionarios')
+            else:
+                context['form'] = formulario
+        return render(request, 'administracion/new_func.html', context)
 
 def profile(request, id):
 

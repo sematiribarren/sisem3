@@ -1,5 +1,7 @@
+from Bienes.utils import get_user_role
 from django import forms
 from .models import *
+
 
 class EmpleadoForm(forms.ModelForm):
     class Meta:
@@ -19,6 +21,25 @@ class EmpleadoForm(forms.ModelForm):
             'area': forms.Select(attrs={'class': 'form-select'}),
             'user': forms.Select(attrs={'class': 'form-select'}),
         }
+
+        def __init__(self, *args, **kwargs):
+            # Recibimos el usuario que está logueado
+            user = kwargs.pop('user', None)
+            super().__init__(*args, **kwargs)
+            
+            if user:
+                rol = get_user_role(user)
+                
+                # Si es encargado de bienes
+                if rol[0] == 'encargado_bienes':
+                    area_del_encargado = rol[1]
+                    # Solo mostrar su área
+                    self.fields['area'].queryset = Departamento.objects.filter(id=area_del_encargado.id)
+                    # Poner su área por defecto
+                    self.fields['area'].initial = area_del_encargado
+                    # Hacer el campo de solo lectura (no puede cambiarlo)
+                    self.fields['area'].widget.attrs['readonly'] = True
+                    self.fields['area'].disabled = True
 
 class HijoForm(forms.ModelForm):
     class Meta:

@@ -63,20 +63,6 @@
           lengthMenu: [10, 25, 50, -1],
           buttons: [
             {
-              text: "Bienes separados",
-              className: "btn-new",
-              action: (e) => {
-                window.location.href = "";
-              },
-            },
-            {
-              text: "Areas",
-              className: "btn-area",
-              action: (e) => {
-                window.location.href = "";
-              },
-            },
-            {
               extend: "excel",
               filename: " BIENES-EXCEL",
               exportOptions: {
@@ -161,7 +147,7 @@
                   .row($(this).parents("tr"))
                   .data();
                 var id = data.id;
-                window.location.href = "{% url 'add_bien' id=1 %}".replace(
+                window.location.href = "{% url 'edit_bien_det' id=1 %}".replace(
                   "1",
                   id,
                 );
@@ -176,8 +162,10 @@
                   .row($(this).parents("tr"))
                   .data();
                 var id = data.id;
-                window.location.href =
-                  "{% url 'bienes_detallado' id=1 %}".replace("1", id);
+                window.location.href = "{% url 'edit_bien_det' id=1 %}".replace(
+                  "1",
+                  id,
+                );
               },
             );
           },

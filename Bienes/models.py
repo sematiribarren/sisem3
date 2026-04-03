@@ -1,5 +1,6 @@
 from django.db import models
 from Administracion.models import *
+from django.contrib.auth.models import User
 
 class Bienes (models.Model):
     id = models.AutoField(primary_key=True)
@@ -116,3 +117,39 @@ class Bienes_informes (models.Model):
 
     def __str__(self):
         return f"Informe de Bien #{self.id_bien} - ({self.description})"
+    
+
+class otros_bienes(models.Model):
+    id = models.AutoField(primary_key=True)
+    bm = models.CharField(max_length=200, unique=True, blank=False)
+    description = models.TextField(max_length=500, blank=True)
+    area = models.ForeignKey(Departamento, on_delete=models.CASCADE, blank=False)
+    observation = models.CharField(max_length=100, blank=True, null=True)
+    status = models.BooleanField(default=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'otros_bienes'
+        ordering = ['-id']
+
+    def __str__(self):
+        return f"Otro Bien #{self.id} - ({self.description})"
+    
+
+class encargado_bienes(models.Model):
+    id = models.AutoField(primary_key=True)
+    area = models.ForeignKey(Departamento, on_delete=models.CASCADE, blank=False)
+    id_worker = models.ForeignKey(User, on_delete=models.CASCADE, max_length=100)
+    signature = models.FileField(upload_to ='Firma_Encargado/',  blank=True, null=True)
+    observation = models.CharField(max_length=100, blank=True, null=True)
+    status = models.BooleanField(default=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'encargado_bienes'
+        ordering = ['-id']
+
+    def __str__(self):
+        return f"Encargado de Bienes #{self.id_worker} - ({self.area.name})"

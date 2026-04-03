@@ -1,12 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 from django.urls import reverse
 from .models import *
 from .forms import *
-
-# Create your views here.
-
 
 def bienes(request):
     return render(request, 'bienes/bienes.html')
@@ -25,69 +23,73 @@ def lista_bienes(request):
         ]
     return JsonResponse({'data':data}, safe=False)
 
+@login_required
 def add_bien(request, id):
-    import logging
-    logger = logging.getLogger(__name__)
+
+    usuario_actual = request.user
+    rol = get_user_role(usuario_actual)
     
     bien_fisico = get_object_or_404(Bienes, id=id)
+
+    if rol == 'admin' or rol[0] == 'encargado_bienes':
     
-    if request.method == 'POST':
-        form = addBien_form(request.POST)
-        
-        condition_bien = request.POST.get('condition') 
-        
-        print("="*50)
-        print("Datos POST recibidos:", request.POST)
-        print("Condición de bien recibida:", condition_bien)
-        print("="*50)
-        
-        if form.is_valid():
-            print("Formulario válido, procesando...")
+        if request.method == 'POST':
+            form = addBien_form(request.POST, user=usuario_actual)
             
-            if bien_fisico.part and '/' in bien_fisico.part:
+            condition_bien = request.POST.get('condition') 
+            
+            print("="*50)
+            print("Datos POST recibidos:", request.POST)
+            print("Condición de bien recibida:", condition_bien)
+            print("="*50)
+            
+            if form.is_valid():
+                print("Formulario válido, procesando...")
+                
+                if bien_fisico.part and '/' in bien_fisico.part:
+                    try:
+                        actual, total = map(int, bien_fisico.part.split('/'))
+                        
+                        if actual < total:
+                            actual += 1
+                            nuevo_part = f"{actual}/{total}"
+                            
+                            if actual == total:
+                                bien_fisico.condition = 'Completo'
+                                print("Bien físico marcado como Completo")
+                            else:
+                                bien_fisico.condition = 'Incompleto'
+                                print("Bien físico marcado como Incompleto")
+                            
+                            bien_fisico.part = nuevo_part
+                            bien_fisico.save()
+                            print(f"Part actualizado: {nuevo_part}")
+                            
+                    except ValueError as e:
+                        print(f"Error al procesar part: {e}")
+                
                 try:
-                    actual, total = map(int, bien_fisico.part.split('/'))
+                    form.instance.bm_worker = bien_fisico.bm
+                    form.instance.id_bien = bien_fisico
                     
-                    if actual < total:
-                        actual += 1
-                        nuevo_part = f"{actual}/{total}"
-                        
-                        if actual == total:
-                            bien_fisico.condition = 'Completo'
-                            print("Bien físico marcado como Completo")
-                        else:
-                            bien_fisico.condition = 'Incompleto'
-                            print("Bien físico marcado como Incompleto")
-                        
-                        bien_fisico.part = nuevo_part
-                        bien_fisico.save()
-                        print(f"Part actualizado: {nuevo_part}")
-                        
-                except ValueError as e:
-                    print(f"Error al procesar part: {e}")
-            
-            try:
-                form.instance.bm_worker = bien_fisico.bm
-                form.instance.id_bien = bien_fisico
-                
-                if condition_bien:
-                    form.instance.condition = condition_bien
-                    print(f"Asignando condición: {condition_bien} a la instancia")
-                
-                asignacion = form.save()
-                
-                print(f"Asignación guardada exitosamente con ID: {asignacion.id}")
-                print(f"Condición guardada: {asignacion.condition}")
-                print(f"Condición en BD: {Bienes_persona.objects.get(id=asignacion.id).condition}")
-                
-                return redirect('bienes')
-                
-            except Exception as e:
-                print(f"Error al guardar asignación: {e}")
+                    if condition_bien:
+                        form.instance.condition = condition_bien
+                        print(f"Asignando condición: {condition_bien} a la instancia")
+                    
+                    asignacion = form.save()
+                    
+                    print(f"Asignación guardada exitosamente con ID: {asignacion.id}")
+                    print(f"Condición guardada: {asignacion.condition}")
+                    print(f"Condición en BD: {Bienes_persona.objects.get(id=asignacion.id).condition}")
+                    
+                    return redirect('bienes')
+                    
+                except Exception as e:
+                    print(f"Error al guardar asignación: {e}")
+            else:
+                print("Errores del formulario:", form.errors)
         else:
-            print("Errores del formulario:", form.errors)
-    else:
-        form = addBien_form()
+            form = addBien_form()
     
     context = {
         'form': form,
@@ -144,6 +146,28 @@ def lista_bienes_det(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+def editar_asignacion(request, id):
+    asignacion = get_object_or_404(Bienes_persona, id=id)
+    
+    if request.method == 'POST':
+        form = addBien_form(request.POST, instance=asignacion)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Asignación actualizada correctamente")
+            return redirect('bienes')
+        else:
+            messages.error(request, "Error al actualizar la asignación")
+    else:
+        form = addBien_form(instance=asignacion)
+    
+    context = {
+        'form': form,
+        'asignacion': asignacion,
+    }
+    
+    return render(request, 'bienes/edit_bien_det.html', context)
     
 def borrar_asignacion(request, id):
     try:
@@ -200,3 +224,59 @@ def borrar_asignacion(request, id):
         print(f"Error en borrar_asignacion: {e}")
         messages.error(request, f"Error al eliminar la asignación: {str(e)}")
         return redirect('bienes')
+
+@login_required
+def listado_bienes_det(request):
+    usuario_actual = request.user
+    rol = get_user_role(usuario_actual)
+    if rol == 'admin':
+
+        entity = Bienes_persona.objects.all()
+        data = [
+        {
+                'bm': c.bm_worker,
+                'descripcion': c.description,
+                'area': str(c.area.name) if c.area else '',
+                'funcionario': str(c.id_worker.names) if c.id_worker else '',
+                'condicion': c.condition.capitalize() if c.condition else '',
+                'observacion': c.observation or '',
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
+    
+    elif rol[0] == 'encargado_bienes':
+        area = rol[1]
+        
+        entity = Bienes_persona.objects.filter(area=area)
+        data = [
+        {
+                'bm': c.bm_worker,
+                'descripcion': c.description,
+                'area': str(c.area.name) if c.area else '',
+                'funcionario': str(c.id_worker.names) if c.id_worker else '',
+                'condicion': c.condition.capitalize() if c.condition else '',
+                'observacion': c.observation or '',
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
+    
+    else:
+
+        entity = Bienes_persona.objects.filter(id_worker__user=usuario_actual)
+        data = [
+        {
+                'bm': c.bm_worker,
+                'descripcion': c.description,
+                'area': str(c.area.name) if c.area else '',
+                'funcionario': str(c.id_worker.names) if c.id_worker else '',
+                'condicion': c.condition.capitalize() if c.condition else '',
+                'observacion': c.observation or '',
+                'id': c.id,
+                } for c in entity
+            ]
+        return JsonResponse({'data':data}, safe=False)
+
+def bienes_det(request):
+    return render(request, 'bienes/lista_bien_det.html')
