@@ -5,6 +5,7 @@ from Administracion import views
 urlpatterns = [
     path('home/', Home, name='home'),
     path("profile/<int:id>", views.profile, name="profile"),
+    path('eliminar_funcionario/<int:id>/', views.eliminar_funcionario, name='eliminar_funcionario'),
     
 
 

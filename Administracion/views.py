@@ -1,10 +1,11 @@
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
 from django.core.cache import cache
 from Bienes.models import Bienes
+from datetime import date
 from .models import *
 from .forms import *
 import requests
@@ -174,15 +175,16 @@ def crear_funcionario(request):
         'form': EmpleadoForm()
     }
 
-    if rol == 'admin' or rol[0] == 'encargado_bienes':
+    if rol == 'admin' or (isinstance(rol, tuple) and rol[0] == 'encargado_bienes'):
 
         if request.method == 'POST':
             formulario = EmpleadoForm(request.POST, user=usuario_actual)
             if formulario.is_valid():
                 empleado = formulario.save(commit=False)
 
-                if rol[0] == 'encargado_bienes':
-                    empleado.area = rol[1]  # Asignar el área del encargado
+                if isinstance(rol, tuple) and rol[0] == 'encargado_bienes':
+                    empleado.area = rol[1]
+                    print(f"Forzando área: {empleado.area.name}")
                 
                 empleado.save()
                 messages.success(request, 'Empleado registrado exitosamente')
@@ -190,17 +192,41 @@ def crear_funcionario(request):
                 return redirect('funcionarios')
             else:
                 context['form'] = formulario
+        else:
+            # GET request - mostrar formulario vacío
+            form = EmpleadoForm(user=usuario_actual)
+            
+            # Verificar qué áreas se están mostrando (depuración)
+            if hasattr(form.fields['area'], 'queryset'):
+                areas_disponibles = form.fields['area'].queryset
+                print(f"Áreas disponibles: {[area.name for area in areas_disponibles]}")
+
         return render(request, 'administracion/new_func.html', context)
+    
+    else:
+        messages.error(request, 'No tienes permiso para registrar empleados')
+        return redirect('inicio')
 
 def profile(request, id):
+    hoy = date.today()
 
 
-    employee = Empleado.objects.filter(user = id).first()
+    employee = get_object_or_404(Empleado, id=id)
+    fecha_nacimiento = employee.birthday
+    edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
 
     context = {
-        'employee': employee
+        'employee': employee,
+        'edad': edad,
     }
     
     return render(request, 'profile.html', context)
 
+
+def eliminar_funcionario(request, id):
+
+    empleado = Empleado.objects.get(id=id)
+    empleado.delete()
+    messages.success(request, 'Empleado eliminado exitosamente')
+    return redirect('funcionarios')
 
