@@ -1,10 +1,11 @@
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from Bienes.models import Bienes, encargado_bienes
+from Bienes.utils import get_user_role
 from django.http import JsonResponse
 from django.contrib import messages
 from django.core.cache import cache
-from Bienes.models import Bienes
 from datetime import date
 from .models import *
 from .forms import *
@@ -167,46 +168,40 @@ def lista_funcionarios(request):
 @never_cache
 @login_required
 def crear_funcionario(request):
-
     usuario_actual = request.user
-    rol = get_user_role(usuario_actual)
+    responsable = encargado_bienes.objects.filter(id_worker=usuario_actual).first()
     
-    context = {
-        'form': EmpleadoForm()
-    }
-
-    if rol == 'admin' or (isinstance(rol, tuple) and rol[0] == 'encargado_bienes'):
-
-        if request.method == 'POST':
-            formulario = EmpleadoForm(request.POST, user=usuario_actual)
-            if formulario.is_valid():
-                empleado = formulario.save(commit=False)
-
-                if isinstance(rol, tuple) and rol[0] == 'encargado_bienes':
-                    empleado.area = rol[1]
-                    print(f"Forzando área: {empleado.area.name}")
-                
-                empleado.save()
-                messages.success(request, 'Empleado registrado exitosamente')
-
-                return redirect('funcionarios')
-            else:
-                context['form'] = formulario
+    if request.method == 'POST':
+        # Si no es admin, forzar el valor del área en POST data
+        if not request.user.is_superuser and responsable:
+            # Crear una copia mutable de POST
+            post_data = request.POST.copy()
+            post_data['area'] = responsable.area
+            formulario = EmpleadoForm(post_data)
         else:
-            # GET request - mostrar formulario vacío
-            form = EmpleadoForm(user=usuario_actual)
-            
-            # Verificar qué áreas se están mostrando (depuración)
-            if hasattr(form.fields['area'], 'queryset'):
-                areas_disponibles = form.fields['area'].queryset
-                print(f"Áreas disponibles: {[area.name for area in areas_disponibles]}")
-
-        return render(request, 'administracion/new_func.html', context)
+            formulario = EmpleadoForm(request.POST)
+        
+        if formulario.is_valid():
+            empleado = formulario.save(commit=False)
+            empleado.save()
+            messages.success(request, 'Empleado registrado exitosamente')
+            return redirect('funcionarios')
+        else:
+            context = {
+                'form': formulario,
+                'is_admin': request.user.is_superuser,
+                'responsable': responsable,
+            }
+            return render(request, 'administracion/new_func.html', context)
     
     else:
-        messages.error(request, 'No tienes permiso para registrar empleados')
-        return redirect('inicio')
-
+        context = {
+            'form': EmpleadoForm(),
+            'is_admin': request.user.is_superuser,
+            'responsable': responsable,
+        }
+        return render(request, 'administracion/new_func.html', context)
+    
 def profile(request, id):
     hoy = date.today()
 
