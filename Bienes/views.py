@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .utils import get_empleados_por_area_usuario
+from .utils import get_empleados_por_area_usuario, get_user_role
 from django.http import JsonResponse
 from django.contrib import messages
 from django.urls import reverse
