@@ -41,11 +41,26 @@
       <div class="parent">
         <div class="div1">
           <h6>Area</h6>
-          {{form.area}}
+          {% if is_admin %} {{form.area}} {% else %}
+          <input
+            type="text"
+            class="form-control"
+            value="{{ responsable.area }}"
+            disabled
+          />
+          {% endif %}
         </div>
         <div class="div2">
           <h6>Funcionario</h6>
-          {{form.id_worker}}
+          <select name="id_worker" class="form-select">
+            <option value="">Seleccione un empleado</option>
+            {% for empleado in empleados %}
+            <option value="{{ empleado.id }}">
+              {{ empleado.names }} - {{ empleado.document }} {% if is_admin %}
+              ({{ empleado.area }}) {% endif %}
+            </option>
+            {% endfor %}
+          </select>
         </div>
         <div class="div3">
           <h6>BM</h6>
@@ -72,8 +87,10 @@
           <select name="condition" class="form-select" required>
             <option value="Bueno">Bueno</option>
             <option value="Dañado">Dañado</option>
+            {% if responsable.area == "Juridico" or is_admin %}
             <option value="Enajenado">Enajenado</option>
             <option value="Comodato">Comodato</option>
+            {% endif %}
           </select>
         </div>
         <div class="div10">

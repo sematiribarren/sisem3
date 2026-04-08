@@ -73,7 +73,20 @@
         </div>
         <div class="div10">
           <h6>Area</h6>
-          {{ form.area }}
+          {% if is_admin %} {{ form.area }} {% else %}
+          <input
+            type="text"
+            class="form-control"
+            value="{{ responsable.area }}"
+            readonly
+          />
+          <input
+            type="hidden"
+            class="form-control"
+            value="{{ responsable.area }}"
+            readonly
+          />
+          {% endif %}
         </div>
         <div class="div11">
           <h6>Hijos?</h6>
