@@ -39,7 +39,7 @@ class Bienes_persona(models.Model):
     id_bien = models.ForeignKey(Bienes, on_delete=models.CASCADE, max_length=20, blank=True)
     bm_worker = models.CharField(max_length=100, blank=True)
     serial = models.CharField(max_length=100, blank=True)
-    description = models.CharField (max_length=100, blank=True)
+    description = models.TextField(max_length=500, blank=True)
     brand = models.CharField(max_length=100, blank=True)
     condition = models.CharField(max_length=50, blank=True)
     signature = models.FileField(upload_to ='Firma_persona/',  blank=True, null=True)
@@ -121,9 +121,12 @@ class Bienes_informes (models.Model):
 
 class otros_bienes(models.Model):
     id = models.AutoField(primary_key=True)
-    bm = models.CharField(max_length=200, unique=True, blank=False)
+    bm = models.CharField(max_length=200, blank=False)
     description = models.TextField(max_length=500, blank=True)
+    serial = models.CharField(max_length=50, blank=True)
     area = models.ForeignKey(Departamento, on_delete=models.CASCADE, blank=False)
+    id_worker = models.ForeignKey(Empleado, on_delete=models.CASCADE)
+    condition = models.CharField(max_length=20, blank=True)
     observation = models.CharField(max_length=100, blank=True, null=True)
     status = models.BooleanField(default=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
