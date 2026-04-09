@@ -57,6 +57,7 @@ local_settings.py
 .env
 secrets.json
 
+
 # Carpetas de medios (subidas por usuarios) y estáticos (collectstatic)
 /media/
 /static/
