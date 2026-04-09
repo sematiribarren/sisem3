@@ -57,11 +57,6 @@ local_settings.py
 .env
 secrets.json
 
-
-# Carpetas de medios (subidas por usuarios) y estáticos (collectstatic)
-/media/
-/static/
-
 ### Entornos Virtuales ###
 # Ignorar TODA la carpeta del entorno virtual. Es enorme y específica de tu máquina.
 venv/
